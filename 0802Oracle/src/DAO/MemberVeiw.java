@@ -19,20 +19,46 @@ import javax.swing.JTextField;
 import javax.swing.border.TitledBorder;
 
 public class MemberVeiw extends JFrame {
+	// 필요한 UI변수 선언
 
 	// 레이블 선언
 	JLabel lblId, lblNickname, lblPw, lblEmail, lblPhone, lblBrithday;
 	// 입력받을 텍스트 필드 선언
 	JTextField tfId, tfNickname, tfPw, tfEmail, tfPhone, tfBirthday;
-	// 버튼
+	// 버튼 변수
 	JButton btnFrist, btnPrev, btnNext, btnLast, btnInsert, btnUpdate, btnDelete, btnSearch, btnClear;
-	//
+	// 현제 출력 중인 데이터의 인덱스를 표시할 레이블
 	JLabel lblIndex;
-	// 생성자
+	// 데이터베이스 작업을 위한 DAO 변수
 	MemberDao dao = new MemberDaoImpl();
-	//
+	// 데이터베이스에서 가져온 데이터를 저장하기 위한 list
 	List<Member> list;
 
+	// 현재 출력 중인 데이터의 인덱스를 저장할 변수
+	int idx;
+
+	// idx번째 데이터를 화면에 출력해주는 메소드
+	// 맨 처음 한번 호출하고 데이터에 작업이 발생하면 호출하는 메소드
+	private void printData() {
+		// 읽을 데이터가 없다면 메세지 박스를 출력하고 return
+		if (list.size() == 0) {
+			JOptionPane.showMessageDialog(null, "읽을 데이터가 없습니다.", "데이터 없음", JOptionPane.ERROR_MESSAGE);
+			return;
+		}
+		// list의 idx번째 데이터를 가져옵니다.
+		Member m = list.get(idx);
+		tfId.setText(m.getId());
+		tfNickname.setText(m.getNickname());
+		tfPw.setText(m.getPw());
+		tfEmail.setText(m.getEmail());
+		tfPhone.setText(m.getPhone());
+		// 생일은 date 타입으로 toString을 호츨해서 String으로 변환
+		tfBirthday.setText(m.getBirthday().toString());
+		// 레이블에 현재 인덱스를 출력
+		lblIndex.setText(String.format("%d", idx + 1));
+	}
+
+	// 생성자
 	public MemberVeiw() {
 		centerDisplay();
 		southDisplay();
@@ -42,6 +68,7 @@ public class MemberVeiw extends JFrame {
 		setVisible(true);
 	}
 
+	// 중앙 패널
 	private void centerDisplay() {
 		JPanel centerPanel = new JPanel();
 		lblId = new JLabel("아이디", JLabel.RIGHT);
@@ -76,11 +103,23 @@ public class MemberVeiw extends JFrame {
 		add("Center", centerPanel);
 	}
 
+	// 남쪽 패널
 	private void southDisplay() {
 		JPanel panel2 = new JPanel();
 		panel2.setLayout(new GridLayout(1, 5, 7, 7));
 		panel2.setBorder(new TitledBorder("조회"));
 		btnFrist = new JButton("처음으로");
+		btnFrist.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				JOptionPane.showMessageDialog(null, "첫번째 데이터 입니다.", "조회", JOptionPane.INFORMATION_MESSAGE);
+				idx = 0;
+				printData();
+
+			}
+
+		});
 		btnPrev = new JButton("이전");
 		btnNext = new JButton("다음");
 		btnLast = new JButton("마지막으로");
@@ -96,50 +135,51 @@ public class MemberVeiw extends JFrame {
 		JPanel panel3 = new JPanel();
 		panel3.setLayout(new GridLayout(1, 5, 7, 7));
 		panel3.setBorder(new TitledBorder("작업"));
-		
+
 		btnInsert = new JButton("삽입");
 		btnInsert.addActionListener(new ActionListener() {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				//lblIndex의 텍스트 가 삽이이 아니면 메세지 박스를 출력하고 함수의 수행을 종료
-				//문자열의 동일성 여부는 == 아니고 equals
-				if(lblIndex.getText().equals("삽입") == false) {
-					JOptionPane.showMessageDialog(null, "지우고 쓰세요.","삽입에러", JOptionPane.ERROR_MESSAGE);
+				// lblIndex의 텍스트 가 삽이이 아니면 메세지 박스를 출력하고 함수의 수행을 종료
+				// 문자열의 동일성 여부는 == 아니고 equals
+				if (lblIndex.getText().equals("삽입") == false) {
+					JOptionPane.showMessageDialog(null, "지우고 쓰세요.", "삽입에러", JOptionPane.ERROR_MESSAGE);
 					return;
 				}
-				//입력한 데이터를 가져오기 
+				// 입력한 데이터를 가져오기
 				String id = tfId.getText();
 				String nickname = tfNickname.getText();
 				String pw = tfPw.getText();
 				String email = tfEmail.getText();
 				String phone = tfPhone.getText();
 				String birthday = tfBirthday.getText();
-				
-				//입력한 데이터 유효성검사.
-				//1. 입력한 아이디가 필수 입력이고 10자리이상 인지 검사
-				if(id.trim().length()>10) {
+
+				// 입력한 데이터 유효성검사.
+				// 1. 입력한 아이디가 필수 입력이고 10자리이상 인지 검사
+				if (id.trim().length() > 10) {
 					JOptionPane.showMessageDialog(null, "10자이내로 입력하세요.", "입력오류", JOptionPane.ERROR_MESSAGE);
 				}
-				
-				//2. 입력한 전화번호는 필수 입력, 전부숫자, 11자리
-				if(phone.trim().length() != 11) {
+
+				// 2. 입력한 전화번호는 필수 입력, 전부숫자, 11자리
+				if (phone.trim().length() != 11) {
 					JOptionPane.showMessageDialog(null, "11자로 입력하세요.", "입력오류", JOptionPane.ERROR_MESSAGE);
 				}
 				int i = 0;
-				while(i < phone.length()) {
+				while (i < phone.length()) {
 					char ch = phone.charAt(i);
-					if(ch<'0' || ch> '9') break;
+					if (ch < '0' || ch > '9')
+						break;
 					i = i + 1;
 				}
-				//birthday yyyy-mm-dd 형식으로 입력되었다고 가정할때 자료형 변경.
+				// birthday yyyy-mm-dd 형식으로 입력되었다고 가정할때 자료형 변경.
 				int year = Integer.parseInt(birthday.substring(0, 4));
 				int month = Integer.parseInt(birthday.substring(5, 7));
-				int day = Integer.parseInt(birthday.substring(8,10));
+				int day = Integer.parseInt(birthday.substring(8, 10));
 				Calendar cal = Calendar.getInstance();
-				cal.set(year, month-1, day);
+				cal.set(year, month - 1, day);
 				Date date = new Date(cal.getTimeInMillis());
-				
+
 				Member member = new Member();
 				member.setId(id);
 				member.setNickname(nickname);
@@ -147,15 +187,15 @@ public class MemberVeiw extends JFrame {
 				member.setEmail(email);
 				member.setPhone(phone);
 				member.setBirthday(date);
-				
+
 				dao.insertMember(member);
 				list = dao.allMember();
-				int idx = list.size() -1;
-				
+				int idx = list.size() - 1;
+
 			}
-			
+
 		});
-		
+
 		btnUpdate = new JButton("수정");
 		btnUpdate.addActionListener(new ActionListener() {
 
@@ -251,8 +291,8 @@ public class MemberVeiw extends JFrame {
 				tfEmail.setText("");
 				tfPhone.setText("");
 				tfBirthday.setText("");
-				
-				//lblIndex의 타이틀을 삽입으로 변경
+
+				// lblIndex의 타이틀을 삽입으로 변경
 				lblIndex.setText("삽입");
 			}
 		});
