@@ -266,6 +266,7 @@ public class MemberVeiw extends JFrame {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
+				JOptionPane.showMessageDialog(null, "해당 회원이 없습니다. 아이디를 확인해보세요.","아이디로 조회", JOptionPane.QUESTION_MESSAGE);
 				list = dao.idMember(tfId.getText());
 				for (Member m : list) {
 					tfNickname.setText(m.getNickname());
@@ -274,7 +275,7 @@ public class MemberVeiw extends JFrame {
 					tfPhone.setText(m.getPhone());
 					tfBirthday.setText(String.format("%s", m.getBirthday()));
 				}
-				JOptionPane.showMessageDialog(null, "해당 회원이 없습니다. 아이디를 확인해보세요.");
+				
 			}
 
 		});
